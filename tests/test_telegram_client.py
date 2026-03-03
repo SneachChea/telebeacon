@@ -48,7 +48,11 @@ def test_send_message_posts_expected_payload(monkeypatch) -> None:
     client.send_message("hello")
 
     assert captured["url"] == f"{TELEGRAM_API_URL}/bottoken123/sendMessage"
-    assert captured["json"] == {"chat_id": "chat456", "text": "hello"}
+    assert captured["json"] == {
+        "chat_id": "chat456",
+        "text": "hello",
+        "parse_mode": "Markdown",
+    }
 
 
 def test_send_message_raises_on_failed_response(monkeypatch) -> None:
