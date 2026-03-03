@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "telebeacon"
+version = "0.1.0"
+description = "Telebeacon."
+authors = [
+    { name = "SneachChea" }
+]
+requires-python=">=3.11, <4"
+dependencies = [
+    "python-dotenv>=1.2.2",
+    "requests",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-q"
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.5.1",
+    "pytest>=9.0.2",
+]
