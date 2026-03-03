@@ -13,7 +13,7 @@ Minimal helper package for sending Telegram notifications from Python code.
 ## Installation
 
 ```bash
-python -m pip install .
+pip install telebeacon
 ```
 
 For development (tests and tooling):
@@ -24,14 +24,15 @@ python -m pip install -e .[dev]
 
 ## Configuration
 
-Set the required environment variables:
+The package requires `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` to be configured. You can set them in three ways:
 
-```bash
-export TELEGRAM_BOT_TOKEN="<your-bot-token>"
-export TELEGRAM_CHAT_ID="<your-chat-id>"
-```
-
-You can also use a `.env` file and load it with `python-dotenv`.
+1. **OS level**: Set them in your shell session or environment (e.g., `export` or `set`).
+   ```bash
+   export TELEGRAM_BOT_TOKEN="<your-bot-token>"
+   export TELEGRAM_CHAT_ID="<your-chat-id>"
+   ```
+2. **Via `.env` file**: Use `python-dotenv` in your project to load them from a `.env` file. This is the most common approach for libraries installed via pip.
+3. **Automatic lookup**: `telebeacon` functions and decorators automatically look for `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` in your environment.
 
 ## Usage
 
@@ -51,7 +52,7 @@ from telebeacon.notify_telegram import notify_telegram
 
 @notify_telegram
 def run_job() -> None:
- print("running...")
+    print("running...")
 ```
 
 ## Development
