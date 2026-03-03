@@ -49,4 +49,4 @@ def test_send_telegram_message_adds_timestamp(monkeypatch) -> None:
 
     core.send_telegram_message("hello")
 
-    assert dummy_client.sent_messages == ["🕒 [2026-03-03 12:00:00]\nhello"]
+    assert dummy_client.sent_messages == ["[2026-03-03 12:00:00] hello"]
