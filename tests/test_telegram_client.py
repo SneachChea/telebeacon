@@ -18,14 +18,52 @@ def test_init_reads_token_and_chat_id_from_env(monkeypatch) -> None:
     assert client.chat_id == "chat456"
 
 
-def test_init_raises_when_credentials_missing(monkeypatch) -> None:
-    """Constructor should raise when token/chat id are not provided."""
+def test_init_marks_unconfigured_when_credentials_missing(monkeypatch) -> None:
+    """Constructor should not raise but remain unconfigured when env vars are missing."""
 
     monkeypatch.delenv("TELEGRAM_BOT_TOKEN", raising=False)
     monkeypatch.delenv("TELEGRAM_CHAT_ID", raising=False)
 
-    with pytest.raises(ValueError, match="must be provided"):
-        TelegramClient()
+    client = TelegramClient()
+
+    assert client.configured is False
+
+
+def test_init_marks_configured_when_credentials_present(monkeypatch) -> None:
+    """Constructor should mark client as configured when both credentials are present."""
+
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "token123")
+    monkeypatch.setenv("TELEGRAM_CHAT_ID", "chat456")
+
+    client = TelegramClient()
+
+    assert client.configured is True
+
+
+def test_send_message_noop_when_not_configured(monkeypatch) -> None:
+    """send_message should do nothing when client is not configured."""
+
+    monkeypatch.delenv("TELEGRAM_BOT_TOKEN", raising=False)
+    monkeypatch.delenv("TELEGRAM_CHAT_ID", raising=False)
+
+    called = False
+
+    class FakeResponse:
+        ok = True
+        text = ""
+
+    def fake_post(url: str, json: dict[str, str]) -> FakeResponse:
+        nonlocal called
+        _ = (url, json)
+        called = True
+        return FakeResponse()
+
+    monkeypatch.setattr(telegram_client_module.requests, "post", fake_post)
+    client = TelegramClient(token=None, chat_id=None)
+
+    client.send_message("hello")
+
+    assert called is False
 
 
 def test_send_message_posts_expected_payload(monkeypatch) -> None:

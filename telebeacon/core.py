@@ -13,6 +13,9 @@ def _get_client() -> TelegramClient:
 
 def send_telegram_message(message: str) -> None:
     client = _get_client()
+    if not getattr(client, "configured", True):
+        return
+
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     full_message = f"[{timestamp}] {message}"
     client.send_message(full_message)

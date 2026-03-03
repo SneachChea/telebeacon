@@ -10,10 +10,12 @@ class TelegramClient:
     def __init__(self, token: str | None = None, chat_id: str | None = None):
         self.token = token or os.getenv("TELEGRAM_BOT_TOKEN")
         self.chat_id = chat_id or os.getenv("TELEGRAM_CHAT_ID")
-        if not self.token or not self.chat_id:
-            raise ValueError("Telegram bot token and chat ID must be provided")
+        self.configured = bool(self.token and self.chat_id)
 
     def send_message(self, message: str) -> None:
+        if not self.configured:
+            return
+
         url = f"{TELEGRAM_API_URL}/bot{self.token}/sendMessage"
         payload = {
             "chat_id": self.chat_id,
