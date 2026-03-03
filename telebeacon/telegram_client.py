@@ -15,7 +15,11 @@ class TelegramClient:
 
     def send_message(self, message: str) -> None:
         url = f"{TELEGRAM_API_URL}/bot{self.token}/sendMessage"
-        payload = {"chat_id": self.chat_id, "text": message}
+        payload = {
+            "chat_id": self.chat_id,
+            "text": message,
+            "parse_mode": "Markdown",
+        }
         response = requests.post(url, json=payload)
         if not response.ok:
             raise Exception(f"Failed to send message: {response.text}")

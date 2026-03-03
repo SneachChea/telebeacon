@@ -1,5 +1,6 @@
 import functools
 import inspect
+import os
 import time
 from typing import Callable, ParamSpec, TypeVar
 
@@ -31,10 +32,11 @@ def notify_telegram(func: Callable[P, R]) -> Callable[P, R]:
         if caller_frame is None:
             script_name = "<interactive>"
         else:
-            script_name = caller_frame.f_globals.get("__file__", "<interactive>")
+            script_path = caller_frame.f_globals.get("__file__", "<interactive>")
+            script_name = os.path.basename(script_path)
         func_name = func.__name__
 
-        send_telegram_message(f"[{script_name}] function {func_name} started")
+        send_telegram_message(f"🚀 *[{script_name}]* function `{func_name}` started")
         start_time = time.perf_counter()
 
         try:
@@ -43,13 +45,13 @@ def notify_telegram(func: Callable[P, R]) -> Callable[P, R]:
             duration_seconds = time.perf_counter() - start_time
             error_name = type(error).__name__
             send_telegram_message(
-                f"[{script_name}] function {func_name} failed ({error_name}) after {duration_seconds:.2f}s"
+                f"❌ *[{script_name}]* function `{func_name}` failed ({error_name}) after {duration_seconds:.2f}s"
             )
             raise
 
         duration_seconds = time.perf_counter() - start_time
         send_telegram_message(
-            f"[{script_name}] function {func_name} finished successfully in {duration_seconds:.2f}s"
+            f"✅ *[{script_name}]* function `{func_name}` finished successfully in {duration_seconds:.2f}s"
         )
         return result
 

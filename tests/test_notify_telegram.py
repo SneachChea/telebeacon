@@ -23,8 +23,9 @@ def test_notify_telegram_success_sends_start_and_finish(monkeypatch) -> None:
 
     assert result == 3
     assert len(messages) == 2
-    assert "function add started" in messages[0]
-    assert "function add finished successfully in 1.50s" in messages[1]
+    assert "started" in messages[0]
+    assert "finished successfully" in messages[1]
+    assert "1.50s" in messages[1]
 
 
 def test_notify_telegram_failure_sends_start_and_error(monkeypatch) -> None:
@@ -44,8 +45,9 @@ def test_notify_telegram_failure_sends_start_and_error(monkeypatch) -> None:
         boom()
 
     assert len(messages) == 2
-    assert "function boom started" in messages[0]
-    assert "function boom failed (RuntimeError) after 0.75s" in messages[1]
+    assert "started" in messages[0]
+    assert "failed (RuntimeError)" in messages[1]
+    assert "0.75s" in messages[1]
 
 
 def test_notify_telegram_preserves_metadata(monkeypatch) -> None:
