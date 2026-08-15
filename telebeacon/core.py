@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime
 
 from telebeacon.telegram_client import TelegramClient
 
@@ -17,6 +17,6 @@ def send_telegram_message(message: str) -> None:
     if not getattr(client, "configured", True):
         return
 
-    timestamp = datetime.now(tz=UTC).strftime("%Y-%m-%d %H:%M:%S")
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # noqa: DTZ005
     full_message = f"[{timestamp}] {message}"
     client.send_message(full_message)
