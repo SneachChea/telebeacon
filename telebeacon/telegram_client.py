@@ -1,13 +1,8 @@
 import os
 
 import requests
-from dotenv import load_dotenv
 
 TELEGRAM_API_URL = "https://api.telegram.org"
-
-
-class TelegramError(Exception):
-    """Raised when the Telegram API request fails."""
 
 
 class TelegramClient:
@@ -28,10 +23,4 @@ class TelegramClient:
         }
         response = requests.post(url, json=payload)
         if not response.ok:
-            raise TelegramError(f"Failed to send message: {response.text}")
-
-
-if __name__ == "__main__":
-    load_dotenv()
-    client = TelegramClient()
-    client.send_message("Hello from TelegramClient!")
+            raise RuntimeError(f"Failed to send message: {response.text}")

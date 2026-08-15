@@ -2,19 +2,11 @@ from datetime import datetime
 
 from telebeacon.telegram_client import TelegramClient
 
-_client = None
-
-
-def _get_client() -> TelegramClient:
-    global _client
-    if _client is None:
-        _client = TelegramClient()
-    return _client
+client = TelegramClient()
 
 
 def send_telegram_message(message: str) -> None:
-    client = _get_client()
-    if not getattr(client, "configured", True):
+    if not client.configured:
         return
 
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # noqa: DTZ005

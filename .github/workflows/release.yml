@@ -12,13 +12,8 @@ permissions:
 
 jobs:
   build:
-    name: Build (py${{ matrix.python }}, ${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-        python: ["3.11", "3.12", "3.13", "3.14"]
+    name: Build
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -27,7 +22,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python }}
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |
@@ -43,7 +38,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dist-py${{ matrix.python }}-${{ matrix.os }}
+          name: dist
           path: dist/*
 
   release:

@@ -6,6 +6,21 @@ import telebeacon.telegram_client as telegram_client_module
 from telebeacon.telegram_client import TELEGRAM_API_URL, TelegramClient
 
 
+class FakeResponse:
+    def __init__(self, ok: bool = True, text: str = "") -> None:
+        self.ok = ok
+        self.text = text
+
+
+captured: dict[str, object] = {}
+
+
+def fake_post(url: str, json: dict[str, str]) -> FakeResponse:
+    captured["url"] = url
+    captured["json"] = json
+    return FakeResponse()
+
+
 def test_init_reads_token_and_chat_id_from_env(monkeypatch) -> None:
     """Constructor should read credentials from environment variables."""
 
@@ -46,40 +61,19 @@ def test_send_message_noop_when_not_configured(monkeypatch) -> None:
     monkeypatch.delenv("TELEGRAM_BOT_TOKEN", raising=False)
     monkeypatch.delenv("TELEGRAM_CHAT_ID", raising=False)
 
-    called = False
-
-    class FakeResponse:
-        ok = True
-        text = ""
-
-    def fake_post(url: str, json: dict[str, str]) -> FakeResponse:
-        nonlocal called
-        _ = (url, json)
-        called = True
-        return FakeResponse()
-
+    captured.clear()
     monkeypatch.setattr(telegram_client_module.requests, "post", fake_post)
     client = TelegramClient(token=None, chat_id=None)
 
     client.send_message("hello")
 
-    assert called is False
+    assert captured == {}
 
 
 def test_send_message_posts_expected_payload(monkeypatch) -> None:
     """send_message should call Telegram API with expected URL and payload."""
 
-    captured: dict[str, object] = {}
-
-    class FakeResponse:
-        ok = True
-        text = ""
-
-    def fake_post(url: str, json: dict[str, str]) -> FakeResponse:
-        captured["url"] = url
-        captured["json"] = json
-        return FakeResponse()
-
+    captured.clear()
     monkeypatch.setattr(telegram_client_module.requests, "post", fake_post)
     client = TelegramClient(token="token123", chat_id="chat456")
 
@@ -96,16 +90,12 @@ def test_send_message_posts_expected_payload(monkeypatch) -> None:
 def test_send_message_raises_on_failed_response(monkeypatch) -> None:
     """send_message should raise when Telegram API response is not OK."""
 
-    class FakeResponse:
-        ok = False
-        text = "bad request"
-
-    def fake_post(url: str, json: dict[str, str]) -> FakeResponse:
-        _ = (url, json)
-        return FakeResponse()
-
-    monkeypatch.setattr(telegram_client_module.requests, "post", fake_post)
+    monkeypatch.setattr(
+        telegram_client_module.requests,
+        "post",
+        lambda url, json: FakeResponse(ok=False, text="bad request"),
+    )
     client = TelegramClient(token="token123", chat_id="chat456")
 
-    with pytest.raises(Exception, match="Failed to send message: bad request"):
+    with pytest.raises(RuntimeError, match="Failed to send message: bad request"):
         client.send_message("hello")

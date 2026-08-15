@@ -9,28 +9,11 @@ class DummyClient:
     """Simple test double that records sent messages."""
 
     def __init__(self) -> None:
+        self.configured = True
         self.sent_messages: list[str] = []
 
     def send_message(self, message: str) -> None:
         self.sent_messages.append(message)
-
-
-def test_get_client_caches_single_instance(monkeypatch) -> None:
-    """_get_client should instantiate TelegramClient only once."""
-
-    created: list[object] = []
-
-    class FakeTelegramClient:
-        def __init__(self) -> None:
-            created.append(object())
-
-    monkeypatch.setattr(core, "TelegramClient", FakeTelegramClient)
-
-    first = core._get_client()
-    second = core._get_client()
-
-    assert first is second
-    assert len(created) == 1
 
 
 def test_send_telegram_message_adds_timestamp(monkeypatch) -> None:
@@ -47,7 +30,7 @@ def test_send_telegram_message_adds_timestamp(monkeypatch) -> None:
 
     dummy_client = DummyClient()
     monkeypatch.setattr(core, "datetime", FixedDateTime)
-    monkeypatch.setattr(core, "_get_client", lambda: dummy_client)
+    monkeypatch.setattr(core, "client", dummy_client)
 
     core.send_telegram_message("hello")
 
@@ -63,6 +46,6 @@ def test_send_telegram_message_skips_when_client_unconfigured(monkeypatch) -> No
         def send_message(self, message: str) -> None:
             raise AssertionError(f"send_message should not be called: {message}")
 
-    monkeypatch.setattr(core, "_get_client", lambda: UnconfiguredClient())
+    monkeypatch.setattr(core, "client", UnconfiguredClient())
 
     core.send_telegram_message("hello")
