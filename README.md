@@ -8,7 +8,7 @@ Minimal helper package for sending Telegram notifications from Python code.
 
 - Send timestamped messages to a Telegram chat.
 - Decorate functions to notify on start, success, and failure.
-- Includes tests and CI checks (`ruff`, `mypy`, `pytest`).
+- Includes tests and CI checks (`ruff`, `pytest`).
 
 ## Installation
 
@@ -53,6 +53,17 @@ from telebeacon.notify_telegram import notify_telegram
 @notify_telegram
 def run_job() -> None:
     print("running...")
+```
+
+Messages are sent with Markdown parsing enabled. If your message contains
+characters that are special in Markdown (`_`, `*`, `` ` ``, `[`, `]`), escape
+them or disable parsing:
+
+```python
+from telebeacon.telegram_client import TelegramClient
+
+client = TelegramClient(parse_mode=None)
+client.send_message("my message with *plain* text")
 ```
 
 ## Development

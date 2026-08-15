@@ -15,9 +15,10 @@ class FakeResponse:
 captured: dict[str, object] = {}
 
 
-def fake_post(url: str, json: dict[str, str]) -> FakeResponse:
+def fake_post(url: str, json: dict[str, str], timeout: int) -> FakeResponse:
     captured["url"] = url
     captured["json"] = json
+    captured["timeout"] = timeout
     return FakeResponse()
 
 
@@ -85,6 +86,35 @@ def test_send_message_posts_expected_payload(monkeypatch) -> None:
         "text": "hello",
         "parse_mode": "Markdown",
     }
+    assert captured["timeout"] == 10
+
+
+def test_send_message_omits_parse_mode_when_disabled(monkeypatch) -> None:
+    """send_message should not include parse_mode when it is set to None."""
+
+    captured.clear()
+    monkeypatch.setattr(telegram_client_module.requests, "post", fake_post)
+    client = TelegramClient(token="token123", chat_id="chat456", parse_mode=None)
+
+    client.send_message("hello")
+
+    assert captured["json"] == {"chat_id": "chat456", "text": "hello"}
+
+
+def test_send_message_uses_custom_parse_mode(monkeypatch) -> None:
+    """send_message should use the configured parse_mode."""
+
+    captured.clear()
+    monkeypatch.setattr(telegram_client_module.requests, "post", fake_post)
+    client = TelegramClient(token="token123", chat_id="chat456", parse_mode="HTML")
+
+    client.send_message("hello")
+
+    assert captured["json"] == {
+        "chat_id": "chat456",
+        "text": "hello",
+        "parse_mode": "HTML",
+    }
 
 
 def test_send_message_raises_on_failed_response(monkeypatch) -> None:
@@ -93,7 +123,7 @@ def test_send_message_raises_on_failed_response(monkeypatch) -> None:
     monkeypatch.setattr(
         telegram_client_module.requests,
         "post",
-        lambda url, json: FakeResponse(ok=False, text="bad request"),
+        lambda url, json, timeout: FakeResponse(ok=False, text="bad request"),
     )
     client = TelegramClient(token="token123", chat_id="chat456")
 
