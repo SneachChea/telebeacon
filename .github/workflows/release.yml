@@ -11,9 +11,14 @@ permissions:
   id-token: write
 
 jobs:
-  release:
-    name: Build and Release
-    runs-on: ubuntu-latest
+  build:
+    name: Build (py${{ matrix.python }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.11", "3.12", "3.13", "3.14"]
 
     steps:
       - name: Checkout
@@ -22,7 +27,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python }}
 
       - name: Install dependencies
         run: |
@@ -38,8 +43,23 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dist-${{ github.ref_name }}
+          name: dist-py${{ matrix.python }}-${{ matrix.os }}
           path: dist/*
+
+  release:
+    name: Create Release and Publish
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist/
+          merge-multiple: true
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
@@ -49,3 +69,5 @@ jobs:
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
