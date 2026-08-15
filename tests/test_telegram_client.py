@@ -2,8 +2,8 @@
 
 import pytest
 
-from telebeacon.telegram_client import TELEGRAM_API_URL, TelegramClient
 import telebeacon.telegram_client as telegram_client_module
+from telebeacon.telegram_client import TELEGRAM_API_URL, TelegramClient
 
 
 def test_init_reads_token_and_chat_id_from_env(monkeypatch) -> None:

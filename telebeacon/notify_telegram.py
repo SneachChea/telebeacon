@@ -2,7 +2,8 @@ import functools
 import inspect
 import os
 import time
-from typing import Callable, ParamSpec, TypeVar
+from collections.abc import Callable
+from typing import ParamSpec, TypeVar
 
 from .core import send_telegram_message
 

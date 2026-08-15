@@ -1,6 +1,6 @@
 """Unit tests for telebeacon.core."""
 
-from datetime import datetime
+from datetime import UTC, datetime
 
 from telebeacon import core
 
@@ -36,11 +36,13 @@ def test_get_client_caches_single_instance(monkeypatch) -> None:
 def test_send_telegram_message_adds_timestamp(monkeypatch) -> None:
     """send_telegram_message should prefix the outgoing message with a timestamp."""
 
-    fixed_time = datetime(2026, 3, 3, 12, 0, 0)
+    fixed_time = datetime(2026, 3, 3, 12, 0, 0, tzinfo=UTC)
 
     class FixedDateTime:
+        UTC = UTC
+
         @classmethod
-        def now(cls) -> datetime:
+        def now(cls, tz=None) -> datetime:
             return fixed_time
 
     dummy_client = DummyClient()
