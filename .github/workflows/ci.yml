@@ -31,8 +31,13 @@ jobs:
         run: ruff check .
 
   test:
-    name: Tests
-    runs-on: ubuntu-latest
+    name: Tests (py${{ matrix.python }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.11", "3.12", "3.13", "3.14"]
 
     steps:
       - name: Checkout
@@ -41,7 +46,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python }}
 
       - name: Install package and test deps
         run: |
